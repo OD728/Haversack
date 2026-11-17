@@ -1,0 +1,6 @@
+package-as: Haversack
+
+ignore:
+  - README.md
+  - art
+  - CHANGELOG.md
