@@ -2,6 +2,8 @@
 
 **All your bags in one small window, sorted into a few categories**, made for WoW: Forever.
 
+![Haversack in game: quest items, food and water, enchanting and tailoring materials and everything else, with free slots, Soul Shards and gold at the bottom](art/screenshot.png)
+
 - One window for all your bags, the soul bag included.
 - Only a few categories: **Quest Items**, **Food & Water**, one for **each main
   profession you have learned** (Alchemy, Blacksmithing, Enchanting, Engineering,
