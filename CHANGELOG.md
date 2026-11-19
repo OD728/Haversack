@@ -18,5 +18,5 @@ First release.
 - Uses the game's own bag slots, so using, moving and selling items work as usual,
   also in combat.
 - B opens all bags (it uses the game's "Open All Bags"). Your key bindings are not changed.
-- Matches mUI's theme color when mUI is installed; works without it too.
+- A clean, dark window that fits the game's own UI.
 - English and German.

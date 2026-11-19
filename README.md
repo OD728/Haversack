@@ -2,7 +2,7 @@
 
 **All your bags in one small window, sorted into a few categories**, made for WoW: Forever.
 
-![Haversack in game: quest items, food and water, enchanting and tailoring materials and everything else, with free slots, Soul Shards and gold at the bottom](art/screenshot.png)
+![Haversack in game: quest items, food and water, enchanting and tailoring materials and everything else in square slots with rarity frames, with free slots, Soul Shards and gold at the bottom](art/screenshot.png)
 
 - One window for all your bags, the soul bag included.
 - Only a few categories: **Quest Items**, **Food & Water**, one for **each main
@@ -16,8 +16,7 @@
   grid so they don't fill the window.
 - All empty slots shown as one slot with the free count on it.
 - A search box and a button for the game's own bag sort.
-- Fits in with [mUI](https://www.curseforge.com/projects/737373): takes mUI's theme
-  color when it's installed, and looks fine without it.
+- A clean, dark window that fits the game's own UI.
 - English and German.
 
 ## Install
