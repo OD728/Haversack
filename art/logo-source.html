@@ -4,8 +4,7 @@
 </head><body>
 <canvas id="c" width="512" height="512"></canvas>
 <script>
-// Haversack logo: a round sack tied with a rope, carrying the addon's square
-// slots (thin frame in quest yellow / uncommon / rare / epic, soft shadow).
+// Haversack logo: a round sack tied with a rope.
 const c = document.getElementById('c');
 const g = c.getContext('2d');
 const W = 512;
@@ -101,28 +100,5 @@ rope(() => { g.beginPath(); g.moveTo(276, NECK_Y + 12); g.bezierCurveTo(320, NEC
 g.fillStyle = '#000'; g.beginPath(); g.arc(270, NECK_Y + 12, 15, 0, Math.PI * 2); g.fill();
 g.fillStyle = '#d8b46a'; g.beginPath(); g.arc(270, NECK_Y + 12, 11, 0, Math.PI * 2); g.fill();
 
-// ---- the addon's slots on the front: 2 x 2 ---------------------------------
-const S = 60, GAP = 14;
-const GX = 256 - S - GAP / 2, GY = 268;
-const frames = ['#ffcc00', '#1eff00', '#0070dd', '#a335ee'];   // quest, uncommon, rare, epic
-const fills = [
-  ['#7a5a1a', '#2a1c08'], ['#2f6a2a', '#0d220c'],
-  ['#28507a', '#0a1828'], ['#5a2a7a', '#1c0a28'],
-];
-frames.forEach((col, i) => {
-  const x = GX + (i % 2) * (S + GAP), y = GY + Math.floor(i / 2) * (S + GAP);
-  [[3, 0.35], [6, 0.2], [9, 0.1]].forEach(([d, a]) => {          // soft shadow
-    g.fillStyle = `rgba(0,0,0,${a})`; g.fillRect(x - d, y - d, S + 2 * d, S + 2 * d);
-  });
-  g.fillStyle = '#000'; g.fillRect(x, y, S, S);                 // black edge
-  g.fillStyle = col; g.fillRect(x + 3, y + 3, S - 6, S - 6);     // rarity frame
-  g.fillStyle = '#000'; g.fillRect(x + 6, y + 6, S - 12, S - 12);
-  let ic = g.createLinearGradient(x, y, x + S, y + S);          // "icon"
-  ic.addColorStop(0, fills[i][0]); ic.addColorStop(1, fills[i][1]);
-  g.fillStyle = ic; g.fillRect(x + 8, y + 8, S - 16, S - 16);
-  let sh = g.createLinearGradient(0, y + 8, 0, y + S - 8);
-  sh.addColorStop(0, 'rgba(255,255,255,0.22)'); sh.addColorStop(0.5, 'rgba(255,255,255,0)');
-  g.fillStyle = sh; g.fillRect(x + 8, y + 8, S - 16, S - 16);
-});
 </script>
 </body></html>
