@@ -612,9 +612,20 @@ end
 ---------------------------------------------------------------------------
 -- Sorting & layout
 ---------------------------------------------------------------------------
+-- Within a category: item type, then rarity (best first), then name.
 local function SortItems(a, b)
     if a.classID ~= b.classID then return (a.classID or 99) < (b.classID or 99) end
     if a.quality ~= b.quality then return (a.quality or 0) > (b.quality or 0) end
+    if a.name ~= b.name then return a.name < b.name end
+    if a.itemID ~= b.itemID then return a.itemID < b.itemID end
+    if a.bag ~= b.bag then return a.bag < b.bag end
+    return a.slot < b.slot
+end
+
+-- Everything Else: rarity first (epic, rare, uncommon, common, poor), then the same as above.
+local function SortByRarity(a, b)
+    if a.quality ~= b.quality then return (a.quality or 0) > (b.quality or 0) end
+    if a.classID ~= b.classID then return (a.classID or 99) < (b.classID or 99) end
     if a.name ~= b.name then return a.name < b.name end
     if a.itemID ~= b.itemID then return a.itemID < b.itemID end
     if a.bag ~= b.bag then return a.bag < b.bag end
@@ -703,7 +714,7 @@ local function Layout()
 
             local free
             if items[#items].isFree then free = tremove(items) end
-            table.sort(items, SortItems)
+            table.sort(items, c.key == "OTHER" and SortByRarity or SortItems)
             if free then tinsert(items, free) end
 
             for i, it in ipairs(items) do

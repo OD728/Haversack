@@ -1,5 +1,9 @@
 # Haversack changelog
 
+## 1.0.2
+
+- Everything Else is now sorted by rarity first: epic, rare, uncommon, common, then poor.
+
 ## 1.0.1
 
 - Free slots now count only your normal bags. The soul bag and other special bags
