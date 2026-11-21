@@ -1,6 +1,6 @@
 # Haversack
 
-**All your bags in one small window, sorted into a few categories**, made for WoW: Forever.
+**WoW: Forever addon:** all your bags in one small window, sorted into a few categories.
 
 ![Haversack in game: quest items, food and water, enchanting and tailoring materials and everything else in square slots with rarity frames, with free slots, Soul Shards and gold at the bottom](art/screenshot.png)
 
