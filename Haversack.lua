@@ -631,6 +631,7 @@ local function Layout()
     local groups = {}
     for _, c in ipairs(CATEGORIES) do groups[c.key] = {} end
     local freeEntry, freeCount, totalSlots = nil, 0, 0
+    local bagFamily = {}   -- [bag] = bag family (0 = normal bag), looked up once per layout
     local seen = {}
     wipe(used)
 
@@ -656,7 +657,14 @@ local function Layout()
                 if bag and PLAYER_BAG[bag] and not seen[key] then
                     seen[key] = true
                     borrowed[b] = true
-                    totalSlots = totalSlots + 1
+                    -- special bags (soul bag, quiver, herb bag...) only hold one kind of
+                    -- item, so they don't count as free space
+                    if bagFamily[bag] == nil then
+                        local _, family = C_Container.GetContainerNumFreeSlots(bag)
+                        bagFamily[bag] = family or 0
+                    end
+                    local normalBag = bagFamily[bag] == 0
+                    if normalBag then totalSlots = totalSlots + 1 end
                     local info = C_Container.GetContainerItemInfo(bag, slot)
                     if info and info.itemID then
                         -- Soul Shards are left out of the grid: the footer counter shows them
@@ -668,12 +676,11 @@ local function Layout()
                                 quality = info.quality or 0, name = name or "", classID = classID,
                             })
                         end
-                    else
+                    elseif normalBag then
                         freeCount = freeCount + 1
-                        -- one empty slot stands for all; prefer a normal bag over e.g. a soul bag
-                        local _, family = C_Container.GetContainerNumFreeSlots(bag)
-                        if not freeEntry or (family == 0 and freeEntry.family ~= 0) then
-                            freeEntry = { button = b, bag = bag, slot = slot, family = family, isFree = true }
+                        -- one empty slot of a normal bag stands for all of them
+                        if not freeEntry then
+                            freeEntry = { button = b, bag = bag, slot = slot, isFree = true }
                         end
                     end
                 end

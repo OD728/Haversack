@@ -1,5 +1,11 @@
 # Haversack changelog
 
+## 1.0.1
+
+- Free slots now count only your normal bags. The soul bag and other special bags
+  (herb, enchanting, ammo...) only hold one kind of item, so their empty slots no
+  longer show up as free space.
+
 ## 1.0
 
 First release.
