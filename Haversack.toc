@@ -2,7 +2,7 @@
 ## Title: |cffcca3ffHaversack|r
 ## Notes: All your bags in one small window, sorted into Quest Items, Food & Water, your main professions and everything else. Gold and Soul Shards at a glance.
 ## Notes-deDE: Alle Taschen in einem kleinen Fenster, sortiert nach Questgegenständen, Essen & Trinken, deinen Hauptberufen und allem anderen. Gold und Seelensplitter auf einen Blick.
-## Version: 1.0.2
+## Version: 1.0.3
 ## Author: Ron
 ## X-License: MIT
 ## OptionalDeps: mUI

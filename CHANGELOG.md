@@ -1,5 +1,10 @@
 # Haversack changelog
 
+## 1.0.3
+
+- Camping features that need a main profession (Spinning Wheel, Loom, Anvil, Tanning
+  Rack and so on) now go into that profession's category instead of Everything Else.
+
 ## 1.0.2
 
 - Everything Else is now sorted by rarity first: epic, rare, uncommon, common, then poor.
