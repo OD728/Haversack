@@ -114,9 +114,23 @@ local PROFESSIONS = {
       spells = { 8613, 8617, 8618, 10768 }, trade = { TG_LEATHER },
       items = Join({ 7005 }, LEATHER) },             -- Skinning Knife
 }
+-- Camping features (WoW: Forever) that need a main profession, tiers 1 to 3.
+-- Cooking, First Aid and Fishing camp items have no category and stay in Everything Else.
+local CAMP = {
+    ALCH   = { 279956, 279970, 279990 }, -- Mana Well, Fermenter, Alchemy Laboratory
+    BS     = { 279944, 279988, 279955 }, -- Sharpening Wheel, Anvil, Master Forge
+    ENCH   = { 279976, 279985, 279987 }, -- Enchanted Lute, Arcane Salvager, Arcane Forge
+    ENGI   = { 279950, 279949, 279989 }, -- Reagent Bot, Repair Bot, Anarchist's Workbench
+    HERB   = { 279962, 279964, 279947 }, -- Incense Candle, Greenhouse, Seed Hybridizer
+    LW     = { 279978, 279941, 279945 }, -- Camp Tent, Tanning Rack, Sewing Machine
+    MINE   = { 279960, 279948, 279952 }, -- Lodestone, Rock Garden, Molten Foundry
+    SKIN   = { 279979, 279969, 279938 }, -- Camp Chair, Field Guide, Trapper's Workbench
+    TAILOR = { 279972, 279943, 279959 }, -- Faction Banner, Spinning Wheel, Loom
+}
+
 for _, p in ipairs(PROFESSIONS) do
     p.label = GetLocale() == "deDE" and p.de or p.en
-    p.itemSet = Set(p.items)
+    p.itemSet = Set(Join(p.items, CAMP[p.key] or {}))
     p.tradeSet = Set(p.trade)
 end
 
