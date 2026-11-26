@@ -8,6 +8,9 @@
 - Only a few categories: **Quest Items**, **Food & Water**, one for **each main
   profession you have learned** (Alchemy, Blacksmithing, Enchanting, Engineering,
   Herbalism, Leatherworking, Mining, Skinning, Tailoring) and **Everything Else**.
+  An optional **Cooking & Fishing** category (off by default) groups ingredients, fish,
+  spices, recipe books, fishing poles and lures; turn it on in ESC > Options > AddOns >
+  Haversack.
   Items are matched by item ID and item type, so it works in any client language.
 - Square slots with a thin frame in the item's rarity color (yellow for quest items)
   and a soft shadow.
