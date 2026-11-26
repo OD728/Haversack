@@ -15,6 +15,9 @@ local L = {
     QUEST  = "Quest Items",
     FOOD   = "Food & Water",
     OTHER  = "Everything Else",
+    COOKFISH = "Cooking & Fishing",
+    OPT_COOKFISH = "Combine Cooking and Fishing items into one category",
+    OPT_COOKFISH_TIP = "Ingredients, fish, recipes, fishing poles and lures get their own section instead of landing in Everything Else.",
     FREE   = "Free slots",
     RESET  = "Haversack: window position reset.",
     SORT   = "Sort bags",
@@ -26,6 +29,9 @@ if GetLocale() == "deDE" then
     L.QUEST = "Questgegenstände"
     L.FOOD  = "Essen & Trinken"
     L.OTHER = "Alles andere"
+    L.COOKFISH = "Kochen & Angeln"
+    L.OPT_COOKFISH = "Kochen und Angeln in einer Kategorie zusammenfassen"
+    L.OPT_COOKFISH_TIP = "Zutaten, Fisch, Rezepte, Angeln und Köder bekommen einen eigenen Abschnitt statt unter Alles andere zu landen."
     L.FREE  = "Freie Plätze"
     L.RESET = "Haversack: Fensterposition zurückgesetzt."
     L.SORT  = "Taschen sortieren"
@@ -44,6 +50,7 @@ local function Join(...)
     return out
 end
 
+local RegisterSettings   -- defined near the events
 local SOUL_SHARD = 6265   -- shown as a counter in the footer, not in the grid
 
 -- Shared material lists
@@ -178,6 +185,17 @@ local CLASS_QUEST      = (Enum.ItemClass and Enum.ItemClass.Questitem) or 12
 local CLASS_WEAPON     = (Enum.ItemClass and Enum.ItemClass.Weapon) or 2
 local CLASS_ARMOR      = (Enum.ItemClass and Enum.ItemClass.Armor) or 4
 local SUB_FOOD         = (Enum.ItemConsumableSubclass and Enum.ItemConsumableSubclass.Fooddrink) or 5
+local TG_COOKING       = (Enum.ItemTradeGoodsSubclass and Enum.ItemTradeGoodsSubclass.Cooking) or 8
+local WEAPON_FISHPOLE  = (Enum.ItemWeaponSubclass and Enum.ItemWeaponSubclass.Fishingpole) or 20
+local RC_COOKING, RC_FISHING = 5, 9   -- recipe subclasses (books)
+
+-- Optional "Cooking & Fishing" category (off by default, see the options page).
+-- Matched by class/subclass plus these item IDs: poles, lures, spices.
+local COOKFISH_ITEMS = Set({
+    6256, 6365, 6366, 6367, 12225, 19022, 19970, 25978,  -- fishing poles
+    6529, 6530, 6532, 6533, 6811,                        -- lures, bait
+    2678, 2692, 3713,                                    -- Mild / Hot / Soothing Spices
+})
 
 local FOOD_SPELL  = SpellName(433, nil)  -- "Food", in the client language
 local DRINK_SPELL = SpellName(430, nil)  -- "Drink"
@@ -187,6 +205,7 @@ local CATEGORIES = {
     { key = "FOOD",  label = L.FOOD },
 }
 for _, p in ipairs(PROFESSIONS) do CATEGORIES[#CATEGORIES + 1] = { key = p.key, label = p.label } end
+CATEGORIES[#CATEGORIES + 1] = { key = "COOKFISH", label = L.COOKFISH }
 CATEGORIES[#CATEGORIES + 1] = { key = "OTHER", label = L.OTHER }
 
 local function ProfessionFor(itemID, classID, subClassID)
@@ -208,6 +227,14 @@ local function Categorize(itemID, bag, slot)
 
     local prof = ProfessionFor(itemID, classID, subClassID)
     if prof then return prof end
+
+    if HaversackDB and HaversackDB.combineCookFish
+        and (COOKFISH_ITEMS[itemID]
+            or (classID == CLASS_TRADEGOODS and subClassID == TG_COOKING)
+            or (classID == CLASS_WEAPON and subClassID == WEAPON_FISHPOLE)
+            or (classID == CLASS_RECIPE and (subClassID == RC_COOKING or subClassID == RC_FISHING))) then
+        return "COOKFISH"
+    end
 
     if classID == CLASS_CONSUMABLE then
         if subClassID == SUB_FOOD then return "FOOD" end
@@ -901,6 +928,33 @@ driver:SetScript("OnUpdate", function()
 end)
 
 ---------------------------------------------------------------------------
+-- Options page: ESC > Options > AddOns > Haversack
+---------------------------------------------------------------------------
+RegisterSettings = function()
+    if not (Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory) then return end
+    local c = CreateFrame("Frame")
+    local title = c:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 16, -16)
+    title:SetText("Haversack")
+    local cb = CreateFrame("CheckButton", nil, c, "UICheckButtonTemplate")
+    cb:SetPoint("TOPLEFT", title, "BOTTOMLEFT", -2, -12)
+    cb.text = cb.text or cb.Text
+    cb.text:SetText(L.OPT_COOKFISH)
+    cb:SetChecked(HaversackDB.combineCookFish and true or false)
+    cb:SetScript("OnClick", function(self)
+        HaversackDB.combineCookFish = self:GetChecked() and true or false
+        QueueLayout()
+    end)
+    local tip = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    tip:SetPoint("TOPLEFT", cb, "BOTTOMLEFT", 30, -2)
+    tip:SetWidth(520)
+    tip:SetJustifyH("LEFT")
+    tip:SetText(L.OPT_COOKFISH_TIP)
+    c:SetScript("OnShow", function() cb:SetChecked(HaversackDB.combineCookFish and true or false) end)
+    pcall(function() Settings.RegisterAddOnCategory(Settings.RegisterCanvasLayoutCategory(c, "Haversack")) end)
+end
+
+---------------------------------------------------------------------------
 -- Events (item visuals are Blizzard's job; these only re-sort or update the footer)
 ---------------------------------------------------------------------------
 driver:RegisterEvent("PLAYER_LOGIN")
@@ -918,6 +972,8 @@ driver:RegisterEvent("UPDATE_BINDINGS")
 driver:SetScript("OnEvent", function(_, event, arg1)
     if event == "PLAYER_LOGIN" then
         HaversackDB = HaversackDB or {}
+        if HaversackDB.combineCookFish == nil then HaversackDB.combineCookFish = false end
+        RegisterSettings()
         RestorePosition()
         RefreshProfessions()
         HookBlizzardFrames()

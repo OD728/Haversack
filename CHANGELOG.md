@@ -1,5 +1,12 @@
 # Haversack changelog
 
+## 1.0.4
+
+- New optional category "Cooking & Fishing": ingredients, fish, spices, Cooking and Fishing
+  recipe books, fishing poles and lures in one section. Off by default; turn it on under
+  ESC > Options > AddOns > Haversack.
+- Haversack now has its own page in the game options (English and German).
+
 ## 1.0.3
 
 - Camping features that need a main profession (Spinning Wheel, Loom, Anvil, Tanning
