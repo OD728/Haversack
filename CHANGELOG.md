@@ -1,5 +1,12 @@
 # Haversack changelog
 
+## 1.0.5
+
+- Choose the window size under ESC > Options > AddOns > Haversack: slots per row
+  (6 to 20) for the width, and the slot size (28 to 48). The height follows your bags.
+  A Defaults button goes back to 10 slots per row and size 37.
+- The window title now says "Haversack" instead of the game's "Combined Backpack".
+
 ## 1.0.4
 
 - New optional category "Cooking & Fishing": ingredients, fish, spices, Cooking and Fishing

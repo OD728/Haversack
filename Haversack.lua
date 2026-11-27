@@ -11,13 +11,18 @@ local function SpellName(id, fallback)
 end
 
 local L = {
-    TITLE  = "Bags",
+    TITLE  = "Haversack",
     QUEST  = "Quest Items",
     FOOD   = "Food & Water",
     OTHER  = "Everything Else",
     COOKFISH = "Cooking & Fishing",
     OPT_COOKFISH = "Combine Cooking and Fishing items into one category",
     OPT_COOKFISH_TIP = "Ingredients, fish, recipes, fishing poles and lures get their own section instead of landing in Everything Else.",
+    OPT_SIZE = "Window size",
+    OPT_COLUMNS = "Width: slots per row",
+    OPT_SLOTSIZE = "Slot size",
+    OPT_SIZE_TIP = "The height follows your bags: fewer slots per row or bigger slots make the window taller.",
+    OPT_DEFAULTS = "Defaults",
     FREE   = "Free slots",
     RESET  = "Haversack: window position reset.",
     SORT   = "Sort bags",
@@ -25,20 +30,23 @@ local L = {
     HELP   = "Haversack: open with B or Shift-B. /haversack reset puts the window back in place.",
 }
 if GetLocale() == "deDE" then
-    L.TITLE = "Taschen"
     L.QUEST = "Questgegenstände"
     L.FOOD  = "Essen & Trinken"
     L.OTHER = "Alles andere"
     L.COOKFISH = "Kochen & Angeln"
     L.OPT_COOKFISH = "Kochen und Angeln in einer Kategorie zusammenfassen"
     L.OPT_COOKFISH_TIP = "Zutaten, Fisch, Rezepte, Angeln und Köder bekommen einen eigenen Abschnitt statt unter Alles andere zu landen."
+    L.OPT_SIZE = "Fenstergröße"
+    L.OPT_COLUMNS = "Breite: Plätze pro Reihe"
+    L.OPT_SLOTSIZE = "Platzgröße"
+    L.OPT_SIZE_TIP = "Die Höhe richtet sich nach deinen Taschen: weniger Plätze pro Reihe oder größere Plätze machen das Fenster höher."
+    L.OPT_DEFAULTS = "Standard"
     L.FREE  = "Freie Plätze"
     L.RESET = "Haversack: Fensterposition zurückgesetzt."
     L.SORT  = "Taschen sortieren"
     L.PARTIAL = "Nur einige Taschen offen – B zeigt alle"
     L.HELP  = "Haversack: Öffnen mit B oder Umschalt-B. /haversack reset setzt das Fenster zurück."
 end
-L.TITLE = COMBINED_BAG_TITLE or L.TITLE
 
 ---------------------------------------------------------------------------
 -- Categories (matched by item ID / item class, never by English names)
@@ -269,7 +277,10 @@ end
 ---------------------------------------------------------------------------
 -- Layout constants
 ---------------------------------------------------------------------------
-local COLUMNS, SIZE, GAP = 10, 37, 4
+-- COLUMNS and SIZE can be changed on the options page (see ApplyDimensions)
+local DEFAULT_COLUMNS, DEFAULT_SIZE = 10, 37
+local MIN_COLUMNS, MAX_COLUMNS, MIN_SIZE, MAX_SIZE = 6, 20, 28, 48
+local COLUMNS, SIZE, GAP = DEFAULT_COLUMNS, DEFAULT_SIZE, 4
 local BORDER_SIZE = 1.5        -- rarity frame thickness in pixels
 local QUALITY_MIN = (Enum.ItemQuality and Enum.ItemQuality.Uncommon) or 2
 local PAD_X, TOP, HEADER_H, FOOTER_H = 12, 62, 20, 30
@@ -352,10 +363,8 @@ sortButton:SetScript("OnClick", function()
     PlaySound(SOUNDKIT.UI_BAG_SORTING_01 or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
     C_Container.SortBags()
 end)
-if not (C_Container and C_Container.SortBags) then
-    sortButton:Hide()
-    search:SetWidth(CONTENT_W - 52)
-end
+local hasSort = C_Container and C_Container.SortBags and true or false
+if not hasSort then sortButton:Hide() end
 
 -- Footer with gold
 local footer = CreateFrame("Frame", nil, f)
@@ -676,6 +685,20 @@ end
 local pendingCombat = false
 local inLayout = false
 
+-- Width = slots per row, slot size scales everything; the height follows the contents.
+local function Clamp(v, lo, hi, default)
+    v = tonumber(v) or default
+    return math.max(lo, math.min(hi, math.floor(v + 0.5)))
+end
+local function ApplyDimensions()
+    local db = HaversackDB or {}
+    COLUMNS = Clamp(db.columns, MIN_COLUMNS, MAX_COLUMNS, DEFAULT_COLUMNS)
+    SIZE = Clamp(db.slotSize, MIN_SIZE, MAX_SIZE, DEFAULT_SIZE)
+    CONTENT_W = COLUMNS * SIZE + (COLUMNS - 1) * GAP
+    f:SetWidth(CONTENT_W + PAD_X * 2)
+    search:SetWidth(CONTENT_W - 52 - (hasSort and 30 or 0))
+end
+
 local function Layout()
     if not f:IsShown() or inLayout then return end
     inLayout = true
@@ -749,6 +772,7 @@ local function Layout()
         if #items > 0 then
             local h = GetHeader(c.key, c.label)
             h:ClearAllPoints()
+            h:SetWidth(CONTENT_W)
             h:SetPoint("TOPLEFT", f, "TOPLEFT", PAD_X, y)
             h:Show()
             y = y - HEADER_H
@@ -930,6 +954,54 @@ end)
 ---------------------------------------------------------------------------
 -- Options page: ESC > Options > AddOns > Haversack
 ---------------------------------------------------------------------------
+-- A plain slider with our own track and thumb (no template: works on every client)
+local function MakeSlider(parent, label, lo, hi, get, set)
+    local s = CreateFrame("Slider", nil, parent)
+    s:SetOrientation("HORIZONTAL")
+    s:SetSize(240, 16)
+    s:SetMinMaxValues(lo, hi)
+    s:SetValueStep(1)
+    if s.SetObeyStepOnDrag then s:SetObeyStepOnDrag(true) end
+    s:EnableMouseWheel(true)
+    local track = s:CreateTexture(nil, "BACKGROUND")
+    track:SetColorTexture(0, 0, 0, 0.6)
+    track:SetPoint("LEFT"); track:SetPoint("RIGHT"); track:SetHeight(6)
+    local thumb = s:CreateTexture(nil, "OVERLAY")
+    thumb:SetColorTexture(0.8, 0.64, 1, 1)   -- lavender, like the addon title
+    thumb:SetSize(10, 16)
+    s:SetThumbTexture(thumb)
+    s.label = s:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    s.label:SetPoint("BOTTOMLEFT", s, "TOPLEFT", 0, 4)
+    s.label:SetText(label)
+    s.value = s:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    s.value:SetPoint("LEFT", s, "RIGHT", 12, 0)
+    s.lo = s:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    s.lo:SetPoint("TOPLEFT", s, "BOTTOMLEFT", 0, -2); s.lo:SetText(lo)
+    s.hi = s:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    s.hi:SetPoint("TOPRIGHT", s, "BOTTOMRIGHT", 0, -2); s.hi:SetText(hi)
+    s.Refresh = function(self)
+        self.syncing = true
+        self:SetValue(get())
+        self.syncing = false
+        self.value:SetText(get())
+    end
+    s:SetScript("OnValueChanged", function(self, v)
+        v = math.floor(v + 0.5)
+        self.value:SetText(v)
+        if not self.syncing and v ~= get() then set(v) end
+    end)
+    s:SetScript("OnMouseWheel", function(self, delta)
+        self:SetValue(math.max(lo, math.min(hi, self:GetValue() + delta)))
+    end)
+    return s
+end
+
+local function SetDimension(key, v)
+    HaversackDB[key] = v
+    ApplyDimensions()
+    QueueLayout()
+end
+
 RegisterSettings = function()
     if not (Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory) then return end
     local c = CreateFrame("Frame")
@@ -950,7 +1022,37 @@ RegisterSettings = function()
     tip:SetWidth(520)
     tip:SetJustifyH("LEFT")
     tip:SetText(L.OPT_COOKFISH_TIP)
-    c:SetScript("OnShow", function() cb:SetChecked(HaversackDB.combineCookFish and true or false) end)
+
+    -- Window size
+    local sizeHead = c:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    sizeHead:SetPoint("TOPLEFT", tip, "BOTTOMLEFT", -28, -28)
+    sizeHead:SetText(L.OPT_SIZE)
+    local cols = MakeSlider(c, L.OPT_COLUMNS, MIN_COLUMNS, MAX_COLUMNS,
+        function() return COLUMNS end, function(v) SetDimension("columns", v) end)
+    cols:SetPoint("TOPLEFT", sizeHead, "BOTTOMLEFT", 4, -30)
+    local size = MakeSlider(c, L.OPT_SLOTSIZE, MIN_SIZE, MAX_SIZE,
+        function() return SIZE end, function(v) SetDimension("slotSize", v) end)
+    size:SetPoint("TOPLEFT", cols, "BOTTOMLEFT", 0, -40)
+    local sizeTip = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    sizeTip:SetPoint("TOPLEFT", size, "BOTTOMLEFT", 0, -22)
+    sizeTip:SetWidth(520)
+    sizeTip:SetJustifyH("LEFT")
+    sizeTip:SetText(L.OPT_SIZE_TIP)
+    local reset = CreateFrame("Button", nil, c, "UIPanelButtonTemplate")
+    reset:SetSize(110, 22)
+    reset:SetPoint("TOPLEFT", sizeTip, "BOTTOMLEFT", 0, -12)
+    reset:SetText(L.OPT_DEFAULTS)
+    reset:SetScript("OnClick", function()
+        HaversackDB.columns, HaversackDB.slotSize = nil, nil
+        ApplyDimensions()
+        QueueLayout()
+        cols:Refresh(); size:Refresh()
+    end)
+
+    c:SetScript("OnShow", function()
+        cb:SetChecked(HaversackDB.combineCookFish and true or false)
+        cols:Refresh(); size:Refresh()
+    end)
     pcall(function() Settings.RegisterAddOnCategory(Settings.RegisterCanvasLayoutCategory(c, "Haversack")) end)
 end
 
@@ -973,6 +1075,7 @@ driver:SetScript("OnEvent", function(_, event, arg1)
     if event == "PLAYER_LOGIN" then
         HaversackDB = HaversackDB or {}
         if HaversackDB.combineCookFish == nil then HaversackDB.combineCookFish = false end
+        ApplyDimensions()
         RegisterSettings()
         RestorePosition()
         RefreshProfessions()

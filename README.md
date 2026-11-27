@@ -19,6 +19,8 @@
   grid so they don't fill the window.
 - All empty slots shown as one slot with the free count on it.
 - A search box and a button for the game's own bag sort.
+- Choose the width (slots per row) and the slot size in ESC > Options > AddOns > Haversack;
+  the height follows your bags.
 - A clean, dark window that fits the game's own UI.
 - English and German.
 
