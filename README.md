@@ -2,7 +2,7 @@
 
 **WoW: Forever addon:** all your bags in one small window, sorted into a few categories.
 
-![Haversack in game: quest items, food and water, enchanting and tailoring materials, and everything else sorted by rarity, in square slots with rarity frames; free slots, Soul Shards and gold at the bottom](art/screenshot.png)
+![Haversack window in game: quest items, food and water, enchanting, tailoring, cooking and fishing, and everything else sorted by rarity, in square slots with rarity frames; free slots, Soul Shards and gold at the bottom](art/screenshot.png)
 
 - One window for all your bags, the soul bag included.
 - Only a few categories: **Quest Items**, **Food & Water**, one for **each main
@@ -23,6 +23,8 @@
   the height follows your bags.
 - A clean, dark window that fits the game's own UI.
 - English and German.
+
+![Haversack options page: Cooking and Fishing checkbox, and Window size sliders for slots per row and slot size](art/options.png)
 
 ## Install
 
